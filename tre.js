@@ -2,46 +2,82 @@ import Canvas from "./Canvas.js";
 import State from "./State.js";
 import SizingGuides from "./SizingGuides.js";
 
-export function render(component, paintableSize, paintCallback) {
+export function rootRender(component) {
+  let _paintable = null;
+
   const componentState = new State(component);
   component(componentState);
 
-  let canvas = null;
+  function runNewRender(cleanPaintable) {
+    if (_paintable == null) {
+      return;
+    }
 
-  function canvasWriteListener(position, oldColor, newColor) {
-    paintCallback(position, newColor);
-  }
+    const [paintableSizeWidth, paintableSizeHeight] = _paintable.getSize();
+    const paint = _paintable.getPaint();
 
-  function renderDraw() {
-    if (canvas != null) {
-      canvas.clear();
-      canvas.detachWriteListener(canvasWriteListener);
+    if (cleanPaintable) {
+      for (let i = 0; i < paintableSizeWidth; i++) {
+        for (let j = 0; j < paintableSizeHeight; j++) {
+          paint([i, j], [0, 0, 0, 0]);
+        }
+      }
     }
 
     const sizingGuides = new SizingGuides({
-      parentSize: paintableSize,
+      parentSize: [paintableSizeWidth, paintableSizeHeight],
       useFullParentSizeWidth: true,
       useFullParentSizeHeight: true,
     });
 
-    const render = componentState.useRender(sizingGuides);
+    function canvasWriteListener(position, oldColor, newColor) {
+      paint(position, newColor);
+    }
 
-    canvas = new Canvas(render.getSize());
+    const render = componentState.useRender(sizingGuides, (callback) => {
+      canvas.attachWriteListener(canvasWriteListener);
+
+      callback();
+
+      canvas.detachWriteListener(canvasWriteListener);
+    });
+
+    const canvas = new Canvas(render.getSize());
 
     canvas.attachWriteListener(canvasWriteListener);
 
     render.getDraw()(canvas);
+
+    canvas.detachWriteListener(canvasWriteListener);
   }
 
-  renderDraw();
+  runNewRender(false);
 
   function stateUpdateListener() {
-    renderDraw();
+    runNewRender(true);
   }
 
   componentState.attachUpdateListener(stateUpdateListener);
 
   componentState.onMounted();
 
-  // return ()=>{}
+  return {
+    usePaintable: (paintable) => {
+      _paintable = paintable;
+      runNewRender(false);
+    },
+  };
+}
+
+export class Paintable {
+  constructor(size, paint) {
+    this._size = size;
+    this._paint = paint;
+  }
+  getSize() {
+    return this._size;
+  }
+  getPaint() {
+    return this._paint;
+  }
 }

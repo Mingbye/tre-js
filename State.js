@@ -44,7 +44,7 @@ export default class State {
     }
   }
 
-  useRender(sizingGuides) {
+  useRender(sizingGuides, requestRunUpdate) {
     const render = this.render(sizingGuides);
 
     const newRenderDependencies = [...render.getDependencies()];
@@ -58,6 +58,7 @@ export default class State {
         if (indexInNewDependencies >= 0) {
           newRenderDependencies.splice(indexInNewDependencies, 1);
         } else {
+          dependency.setRequestRunUpdate(null);
           dependency.getState().onUnmounted();
         }
       }
@@ -66,6 +67,7 @@ export default class State {
     this._render = render;
 
     for (const dependency of newRenderDependencies) {
+      dependency.setRequestRunUpdate(requestRunUpdate);
       dependency.getState().onMounted();
     }
 
@@ -90,7 +92,12 @@ export default class State {
       component(componentState); //setup
     }
 
-    let componentStateRender = componentState.useRender(sizingGuides);
+    let componentStateRender = componentState.useRender(
+      sizingGuides,
+      (callback) => {
+        dependency.requestRunUpdate(callback);
+      }
+    );
 
     const dependency = new Dependency(
       componentState,
@@ -110,8 +117,12 @@ export default class State {
           function stateUpdateListener() {
             componentState.detachUpdateListener(stateUpdateListener);
 
-            const newComponentStateRender =
-              componentState.useRender(sizingGuides);
+            const newComponentStateRender = componentState.useRender(
+              sizingGuides,
+              (callback) => {
+                dependency.requestRunUpdate(callback);
+              }
+            );
             if (
               !xysCompareEqual(
                 componentStateRender.getSize(),
@@ -124,15 +135,20 @@ export default class State {
 
             componentStateRender = newComponentStateRender;
 
-            canvas.attachWriteListener(translater);
+            dependency.requestRunUpdate(() => {
+              canvas.attachWriteListener(translater);
 
-            onUpdate();
+              onUpdate();
 
-            canvas.detachWriteListener(translater);
+              canvas.detachWriteListener(translater);
+            });
           }
 
           componentState.attachUpdateListener(stateUpdateListener);
         }
+      },
+      (position, event) => {
+        return componentStateRender.getEventsHandler()(position, event);
       }
     );
 

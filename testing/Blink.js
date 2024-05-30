@@ -10,7 +10,7 @@ export default function Blink(child) {
       intervalerReference = setInterval(() => {
         show = !show;
         state.update();
-      }, 500);
+      }, 1000);
     };
 
     state.onUnmounted = () => {
@@ -38,7 +38,10 @@ export default function Blink(child) {
           }
           draw();
         },
-        [childDependency]
+        [childDependency],
+        (position, e) => {
+          return childDependency.handleEvent(position, e);
+        }
       );
     };
   };

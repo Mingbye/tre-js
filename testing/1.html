@@ -4,7 +4,7 @@
   </body>
 
   <script type="module">
-    import { render } from "../tre.js";
+    import { rootRender, Paintable } from "../tre.js";
     import X from "./X.js";
     import Blink from "./Blink.js";
     import Align from "./Align.js";
@@ -16,13 +16,13 @@
     const canvasContext2d = canvas.getContext("2d");
 
     const x = X([30, 30]);
-    const a = Align([Align.centerAligner, Align.centerAligner], x);
-    const b = Blink(a);
+    const b = Blink(x);
+    const a = Align([Align.centerAligner, Align.centerAligner], b);
 
-    const destroy = render(
-      a,
-      [canvas.width, canvas.height],
-      (position, color) => {
+    const root = rootRender(a);
+
+    root.usePaintable(
+      new Paintable([canvas.width, canvas.height], (position, color) => {
         // console.log(position, color);
         const [x, y] = position;
         const [a, r, g, b] = color;
@@ -33,7 +33,7 @@
 
         canvasContext2d.fillStyle = `rgb(${r0},${g0},${b0})`;
         canvasContext2d.fillRect(x, y, 1, 1);
-      }
+      })
     );
   </script>
 </html>
