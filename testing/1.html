@@ -1,0 +1,39 @@
+<html>
+  <body style="width: 100%; height: 100%; margin: 0">
+    <canvas style="width: 100%; height: 100%; background: black"></canvas>
+  </body>
+
+  <script type="module">
+    import { render } from "../tre.js";
+    import X from "./X.js";
+    import Blink from "./Blink.js";
+    import Align from "./Align.js";
+
+    const canvas = document.body.querySelector("canvas");
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+
+    const canvasContext2d = canvas.getContext("2d");
+
+    const x = X([30, 30]);
+    const a = Align([Align.centerAligner, Align.centerAligner], x);
+    const b = Blink(a);
+
+    const destroy = render(
+      a,
+      [canvas.width, canvas.height],
+      (position, color) => {
+        // console.log(position, color);
+        const [x, y] = position;
+        const [a, r, g, b] = color;
+
+        const r0 = (a / 255) * r;
+        const g0 = (a / 255) * g;
+        const b0 = (a / 255) * b;
+
+        canvasContext2d.fillStyle = `rgb(${r0},${g0},${b0})`;
+        canvasContext2d.fillRect(x, y, 1, 1);
+      }
+    );
+  </script>
+</html>
