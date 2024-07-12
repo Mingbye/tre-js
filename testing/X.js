@@ -1,10 +1,17 @@
-import Render from "../Render.js";
+import Component from "../Component.js";
+import Skeleton from "../Skeleton.js";
 
-export default function X(size) {
-  return (state) => {
-    state.render = (sizingGuides) => {
-      return new Render(
-        size,
+export default class X extends Component {
+  constructor(size) {
+    super();
+    this._size = size;
+  }
+
+  onRender(sizingGuides) {
+    return new Skeleton(
+      this._size,
+      [null],
+      [
         (canvas) => {
           const [width, height] = canvas.getSize();
           const divisions = Math.max(width, height);
@@ -20,8 +27,8 @@ export default function X(size) {
             canvas.set([width - 1 - x, y], [255, 255, 0, 0]);
           }
         },
-        []
-      );
-    };
-  };
+      ],
+      []
+    );
+  }
 }

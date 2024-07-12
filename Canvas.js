@@ -17,7 +17,6 @@ export default class Canvas {
   }
 
   set(position, color) {
-
     const [width, height] = this._size;
 
     const [x, y] = position;
@@ -25,12 +24,10 @@ export default class Canvas {
     if (x < width && y < height) {
       const index = width * y + x;
 
-      const oldColor = this._build[index];
-
       this._build[index] = color;
 
       for (const listener of this._writeListeners) {
-        listener(position, oldColor, color);
+        listener(position);
       }
     }
   }

@@ -1,36 +1,33 @@
-import xysCompareEqual from "./util/xysCompareEqual.js";
-
 export default class SizingGuides {
-  constructor({
-    parentSize = [0, 0],
-    useFullParentSizeWidth = false,
-    useFullParentSizeHeight = false,
-  }) {
+  constructor({ parentSize = [0, 0], useFullParentSize = [false, false] }) {
     this._parentSize = parentSize;
-    this._useFullParentSizeWidth = useFullParentSizeWidth;
-    this._useFullParentSizeHeight = useFullParentSizeHeight;
+    this._useFullParentSize = useFullParentSize;
   }
 
   getParentSize() {
     return this._parentSize;
   }
 
-  getUseFullParentSizeWidth() {
-    return this._useFullParentSizeWidth;
-  }
-
-  getUseFullParentSizeHeight() {
-    return this._useFullParentSizeHeight;
+  getUseFullParentSize() {
+    return this._useFullParentSize;
   }
 
   equal(...sizingGuidesObjects) {
+    const [parentSizeWidth, parentSizeHeight] = this._parentSize;
+    const [useFullParentSizeWidth, useFullParentSizeHeight] =
+      this._useFullParentSize;
+
     for (const sizeGuides of sizingGuidesObjects) {
-      const equal =
-        xysCompareEqual(this.getParentSize(), sizeGuides.getParentSize()) &&
-        this.getUseFullParentSizeWidth() ==
-          sizeGuides.getUseFullParentSizeWidth() &&
-        this.getUseFullParentSizeHeight() ==
-          sizeGuides.getUseFullParentSizeHeight();
+      const [psw, psh] = sizeGuides.getParentSize();
+      const [ufpsw, ufpsh] = sizeGuides.getUseFullParentSize();
+
+      const parentSizesEqual =
+        psw == parentSizeWidth && psh == parentSizeHeight;
+      const useFullParentSizesEqual =
+        ufpsw == useFullParentSizeWidth && ufpsh == useFullParentSizeHeight;
+
+      const equal = parentSizesEqual && useFullParentSizesEqual;
+
       if (!equal) {
         return false;
       }

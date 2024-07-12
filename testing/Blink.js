@@ -1,48 +1,29 @@
-import Render from "../Render.js";
+import Widget from "../Widget.js";
+import Invisible from "./Invisible.js";
 
-export default function Blink(child) {
-  return (state) => {
-    let show = true;
-    let intervalerReference = null;
+export default class Blink extends Widget {
+  constructor(child) {
+    super();
+    this._child = child;
 
-    state.onMounted = () => {
-      console.log("MOUNTED");
-      intervalerReference = setInterval(() => {
-        show = !show;
-        state.update();
-      }, 1000);
-    };
+    this._show = true;
+    this._intervalerReference = null;
+  }
 
-    state.onUnmounted = () => {
-      console.log("UNMOUNTED");
-      clearInterval(intervalerReference);
-    };
+  onMounted() {
+    console.log("MOUNTED");
+    this._intervalerReference = setInterval(() => {
+      this._show = !this._show;
+      this.updateState();
+    }, 200);
+  }
 
-    state.render = (sizingGuides) => {
-      const childDependency = state.dependency(child, sizingGuides);
-      return new Render(
-        childDependency.getRenderSize(),
-        (canvas) => {
-          function draw() {
-            if (show) {
-              childDependency.paint(
-                (position, oldColor, color) => {
-                  canvas.set(position, color);
-                },
-                () => {
-                  canvas.clear();
-                  draw();
-                }
-              );
-            }
-          }
-          draw();
-        },
-        [childDependency],
-        (position, e) => {
-          return childDependency.handleEvent(position, e);
-        }
-      );
-    };
-  };
+  onUnmounted() {
+    console.log("UNMOUNTED");
+    clearInterval(this._intervalerReference);
+  }
+
+  build() {
+    return this._show ? this._child : new Invisible(this._child);
+  }
 }

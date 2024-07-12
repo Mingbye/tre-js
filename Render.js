@@ -1,29 +1,24 @@
 export default class Render {
-  constructor(size, draw, dependencies, eventsHandler = undefined) {
+  constructor(offset, size, dependency, translaterProvider) {
+    this._offset = offset;
     this._size = size;
-    this._draw = draw;
-    this._dependencies = dependencies;
-    this._eventsHandler = eventsHandler;
+    this._dependency = dependency;
+    this._translaterProvider = translaterProvider;
+  }
+
+  getOffset() {
+    return this._offset;
   }
 
   getSize() {
     return this._size;
   }
 
-  getDraw() {
-    return this._draw;
+  getDependency() {
+    return this._dependency;
   }
 
-  getDependencies() {
-    return this._dependencies;
-  }
-
-  getEventsHandler() {
-    if (this._eventsHandler == undefined) {
-      return (position, event) => {
-        return true;
-      };
-    }
-    return this._eventsHandler;
+  getTranslaterProvider() {
+    return this._translaterProvider;
   }
 }

@@ -6,8 +6,10 @@
   <script type="module">
     import { rootRender, Paintable } from "../tre.js";
     import X from "./X.js";
+    import Parent from "./Parent.js";
     import Blink from "./Blink.js";
     import Align from "./Align.js";
+    import Rotating from "./Rotating.js";
 
     const canvas = document.body.querySelector("canvas");
     canvas.width = canvas.clientWidth;
@@ -15,21 +17,30 @@
 
     const canvasContext2d = canvas.getContext("2d");
 
-    const x = X([30, 30]);
-    const b = Blink(x);
-    const a = Align([Align.centerAligner, Align.centerAligner], b);
+    const x = new X([canvas.clientWidth, canvas.clientHeight]);
+    // const b = new Blink(x);
+    const p = new Parent(x);
+    const r = new Rotating(p);
+    // const a = new Align([Align.centerAligner, Align.centerAligner], b);
+    const p2 = new Parent(r);
+    const p3 = new Parent(p2);
+    const p4 = new Parent(p3);
 
-    const root = rootRender(a);
+    const r2 = new Rotating(x);
+    const root = rootRender(p4);
 
     root.usePaintable(
       new Paintable([canvas.width, canvas.height], (position, color) => {
         // console.log(position, color);
+
         const [x, y] = position;
         const [a, r, g, b] = color;
 
-        const r0 = (a / 255) * r;
-        const g0 = (a / 255) * g;
-        const b0 = (a / 255) * b;
+        // canvasContext2d.clearRect(x, y, 1, 1);
+
+        const r0 = Math.floor((a / 255) * r);
+        const g0 = Math.floor((a / 255) * g);
+        const b0 = Math.floor((a / 255) * b);
 
         canvasContext2d.fillStyle = `rgb(${r0},${g0},${b0})`;
         canvasContext2d.fillRect(x, y, 1, 1);

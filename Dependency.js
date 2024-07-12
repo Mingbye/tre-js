@@ -1,36 +1,46 @@
 export default class Dependency {
-  constructor(state, getRenderSize, paint, handleEvent) {
-    this._state = state;
-    this._getRenderSize = getRenderSize;
-    this._paint = paint;
-    this._handleEvent = handleEvent;
-
-    this._requestRunUpdate = null;
+  constructor(
+    getComponent,
+    renderableGetSize,
+    renderableGetRunRender,
+    renderableGetSetActive,
+    renderableGetRunClean,
+    updateRenderable
+  ) {
+    this._getComponent = getComponent;
+    this._renderableGetSize = renderableGetSize;
+    this._renderableGetRunRender = renderableGetRunRender;
+    this._renderableGetSetActive = renderableGetSetActive;
+    this._renderableGetRunClean = renderableGetRunClean;
+    this._updateRenderable = updateRenderable;
   }
 
-  getState() {
-    return this._state;
-  }
+  getGetComponent = () => {
+    return this._getComponent;
+  };
 
-  getRenderSize() {
-    return this._getRenderSize();
-  }
+  getRenderableGetSize = () => {
+    return this._renderableGetSize;
+  };
 
-  paint(translater, onUpdate) {
-    this._paint(translater, onUpdate);
-  }
+  getRenderableGetRunRender = () => {
+    return this._renderableGetRunRender;
+  };
 
-  handleEvent(position, event) {
-    return this._handleEvent(position, event);
-  }
+  getRenderableGetSetActive = () => {
+    return this._renderableGetSetActive;
+  };
 
-  setRequestRunUpdate(requestRunUpdate) {
-    this._requestRunUpdate = requestRunUpdate;
-  }
+  getRenderableGetRunClean = () => {
+    return this._renderableGetRunClean;
+  };
 
-  requestRunUpdate(callback) {
-    if (this._requestRunUpdate != null) {
-      this._requestRunUpdate(callback);
-    }
-  }
+  getUpdateRenderable = () => {
+    return this._updateRenderable;
+  };
+
+  getSize = () => {
+    //this is an important user's accessed method
+    return this._renderableGetSize();
+  };
 }
