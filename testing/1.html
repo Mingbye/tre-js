@@ -4,7 +4,8 @@
   </body>
 
   <script type="module">
-    import { rootRender, Paintable } from "../tre.js";
+    import { rootRender } from "../tre.js";
+    import Paintable from "../Paintable.js";
     import X from "./X.js";
     import Parent from "./Parent.js";
     import Blink from "./Blink.js";
@@ -27,24 +28,28 @@
     const p4 = new Parent(p3);
 
     const r2 = new Rotating(x);
-    const root = rootRender(p4);
+    const root = rootRender(r2);
 
     root.usePaintable(
-      new Paintable([canvas.width, canvas.height], (position, color) => {
-        // console.log(position, color);
+      new Paintable(
+        [canvas.width, canvas.height],
+        1000 / 30,
+        (position, color) => {
+          // console.log(position, color);
 
-        const [x, y] = position;
-        const [a, r, g, b] = color;
+          const [x, y] = position;
+          const [a, r, g, b] = color;
 
-        // canvasContext2d.clearRect(x, y, 1, 1);
+          // canvasContext2d.clearRect(x, y, 1, 1);
 
-        const r0 = Math.floor((a / 255) * r);
-        const g0 = Math.floor((a / 255) * g);
-        const b0 = Math.floor((a / 255) * b);
+          const r0 = Math.floor((a / 255) * r);
+          const g0 = Math.floor((a / 255) * g);
+          const b0 = Math.floor((a / 255) * b);
 
-        canvasContext2d.fillStyle = `rgb(${r0},${g0},${b0})`;
-        canvasContext2d.fillRect(x, y, 1, 1);
-      })
+          canvasContext2d.fillStyle = `rgb(${r0},${g0},${b0})`;
+          canvasContext2d.fillRect(x, y, 1, 1);
+        }
+      )
     );
   </script>
 </html>

@@ -3,8 +3,9 @@ import Dependency from "./Dependency.js";
 import Skeleton from "./Skeleton.js";
 import X from "./X.js";
 import Renderable from "./Renderable.js";
-import { createCanvasUpdateMap, useCanvasUpdateMap } from "./tre.js";
-import topBottomBlendColors from "./util/topBottomBlendColors.js";
+import topBottomBlendColors from "./topBottomBlendColors.js";
+import createCanvasUpdateMap from "./createCanvasUpdateMap.js";
+import useCanvasUpdateMap from "./useCanvasUpdateMap.js";
 
 export default class Component {
   constructor() {
@@ -398,9 +399,11 @@ export default class Component {
               canvas.detachWriteListener(canvasWriteListener);
             }
 
-            cleanables.delete(render);
+            // cleanables.delete(render);
           }
         }
+
+        cleanables.clear();
       }
     );
   }

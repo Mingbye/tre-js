@@ -23,7 +23,7 @@ export default class X extends Component {
             const x = (i * widthMultiple) | 0;
             const y = (i * heightMultiple) | 0;
 
-            canvas.set([x, y], [255, 255, 0, 0]);
+            canvas.set([x, y], [255, 0, 255, 0]);
             canvas.set([width - 1 - x, y], [255, 255, 0, 0]);
           }
         },

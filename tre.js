@@ -1,6 +1,7 @@
 import Canvas from "./Canvas.js";
-import PaintDiffMonitor from "./PaintDiffMonitor.js";
 import SizingGuides from "./SizingGuides.js";
+import createCanvasUpdateMap from "./createCanvasUpdateMap.js";
+import useCanvasUpdateMap from "./useCanvasUpdateMap.js";
 
 export function rootRender(component) {
   const mounter = {};
@@ -28,9 +29,7 @@ export function rootRender(component) {
 
     renderable = component.createRenderable(sizingGuides);
 
-    const paintDiffMonitor = new PaintDiffMonitor();
-
-    const size = renderable.getSize();
+    const canvas = new Canvas(renderable.getSize());
 
     renderable.getSetActive()(
       mounter,
@@ -51,16 +50,18 @@ export function rootRender(component) {
           }
 
           if (cleanable === true) {
-            paintDiffMonitor.clear(paint);
+            const updateMap = createCanvasUpdateMap(canvas, () => {}, true);
+            useCanvasUpdateMap(updateMap, paint);
             useNewRenderable();
           } else {
-            const updateMap = paintDiffMonitor.createUpdateMap((paint) => {
-              renderable.getRunClean()((position, color) => {
-                paint(position, color);
-              });
-            });
-
-            paintDiffMonitor.applyUpdate(updateMap, paint);
+            const updateMap = createCanvasUpdateMap(
+              canvas,
+              (paint) => {
+                renderable.getRunClean()(paint);
+              },
+              false
+            );
+            useCanvasUpdateMap(updateMap, paint);
           }
 
           cleanable = null;
@@ -71,95 +72,36 @@ export function rootRender(component) {
       }
     );
 
-    const updateMap = paintDiffMonitor.createUpdateMap((paint) => {
-      renderable.getRunRender()(paint);
+    renderable.getRunRender()((position, color) => {
+      canvas.set(position, color);
+      paint(position, color);
     });
-
-    // console.log(updateMap);
-
-    paintDiffMonitor.applyUpdate(updateMap, paint);
   }
 
   useNewRenderable();
 
-  return {
-    usePaintable: (paintable) => {
+  return new RootRendering(
+    (paintable) => {
       _paintable = paintable;
       useNewRenderable();
     },
-  };
+    () => {
+      //implementable
+    }
+  );
 }
 
-export class Paintable {
-  constructor(size, paint) {
-    this._size = size;
-    this._paint = paint;
-  }
-  getSize() {
-    return this._size;
-  }
-  getPaint() {
-    return this._paint;
-  }
-}
-
-export function createCanvasUpdateMap(canvas, callback, clear) {
-  const [canvasWidth, canvasHeight] = canvas.getSize();
-
-  const updateMap = new Map();
-
-  if (clear) {
-    for (let i = 0; i < canvasWidth; i++) {
-      for (let j = 0; j < canvasHeight; j++) {
-        const [a, r, g, b] = canvas.get([i, j]);
-        if (a != 0 || r != 0 || g != 0 || b != 0) {
-          updateMap.set([i, j], [0, 0, 0, 0]);
-          // console.log(i,j);
-        }
-      }
-    }
+export class RootRendering {
+  constructor(usePaintableCallback, destroyCallback) {
+    this._usePaintableCallback = usePaintableCallback;
+    this._destroyCallback = destroyCallback;
   }
 
-  callback((position, color) => {
-    const [px, py] = position;
+  usePaintable(paintable) {
+    this._usePaintableCallback(paintable);
+  }
 
-    if (!(px < canvasWidth && py < canvasHeight)) {
-      return;
-    }
-
-    const [a, r, g, b] = color;
-
-    let matchKey = null;
-    for (const key of updateMap.keys()) {
-      const [kx, ky] = key;
-      if (kx == px && ky == py) {
-        matchKey = key;
-        break;
-      }
-    }
-
-    const [a0, r0, g0, b0] = canvas.get(position);
-
-    const updatesOriginalColor = !(a0 == a && r0 == r && g0 == g && b0 == b);
-
-    if (matchKey != null) {
-      if (updatesOriginalColor) {
-        updateMap.set(matchKey, color);
-      } else {
-        updateMap.delete(matchKey);
-      }
-    } else {
-      if (updatesOriginalColor) {
-        updateMap.set(position, color);
-      }
-    }
-  });
-
-  return updateMap;
-}
-
-export function useCanvasUpdateMap(updateMap, paint) {
-  for (const key of updateMap.keys()) {
-    paint(key, updateMap.get(key));
+  destroy() {
+    this._destroyCallback();
   }
 }

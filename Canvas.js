@@ -45,27 +45,27 @@ export default class Canvas {
     return undefined;
   }
 
-  clear() {
-    const [width, height] = this._size;
-    for (let i = 0; i < width; i++) {
-      for (let j = 0; j < height; j++) {
-        this.set([i, j], [0, 0, 0, 0]);
+  _indexWriteListener(listener) {
+    for (let i = 0; i < this._writeListeners.length; i++) {
+      if (this._writeListeners[i] == listener) {
+        return i;
       }
     }
+    return null;
   }
 
   attachWriteListener(listener) {
-    const indexInWriteListeners = this._writeListeners.indexOf(listener);
-    if (indexInWriteListeners >= 0) {
-      return;
+    const indexInWriteListeners = this._indexWriteListener(listener);
+    if (indexInWriteListeners === null) {
+      this._writeListeners.push(listener);
     }
-    this._writeListeners.push(listener);
   }
 
   detachWriteListener(listener) {
-    const indexInWriteListeners = this._writeListeners.indexOf(listener);
-    if (indexInWriteListeners >= 0) {
+    const indexInWriteListeners = this._indexWriteListener(listener);
+    if (indexInWriteListeners !== null) {
       this._writeListeners.splice(indexInWriteListeners, 1);
     }
   }
+
 }

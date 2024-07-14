@@ -13,12 +13,12 @@ export default class Blink extends Component {
 
   _rotaionLoop(firstTime) {
     if (!firstTime) {
-      this._rotaion = this._rotaion >= 1 ? 0 : this._rotaion + 0.05;
+      this._rotaion = this._rotaion >= 1 ? 0 : this._rotaion + 0.002;
       this.updateState();
     }
     this._intervalerReference = setTimeout(() => {
       this._rotaionLoop(false);
-    }, 25);
+    }, 100);
   }
 
   onMounted() {
